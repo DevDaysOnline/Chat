@@ -4,16 +4,23 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Ocelot.DependencyInjection;
+using Ocelot.Middleware;
+using ProxyKit;
 
 namespace DevDays.Chat.Backend
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        readonly IWebHostEnvironment _hostEnvironment;
+
+        public Startup(IConfiguration configuration, IWebHostEnvironment hostEnvironment)
         {
+            _hostEnvironment = hostEnvironment;
             Configuration = configuration;
         }
 
@@ -24,6 +31,7 @@ namespace DevDays.Chat.Backend
         {
             services.AddRazorPages();
             services.AddControllers();
+            services.AddOcelot();
             services.AddAuthentication(o =>
                 {
                     o.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -35,11 +43,16 @@ namespace DevDays.Chat.Backend
                     o.LoginPath = new PathString("/login");
                     o.Cookie.Name = "ddo.authentication";
                 })
-                .AddCookie("External", o =>
-                {
-                    o.Cookie.Name = "ddo.external.tmp";
-                })
+                .AddCookie("External", o => { o.Cookie.Name = "ddo.external.tmp"; })
                 .AddOpenIdConnectProvider("Twitch", Configuration);
+
+            if (_hostEnvironment.IsDevelopment())
+            {
+                services.Configure<ForwardedHeadersOptions>(options =>
+                {
+                    options.ForwardedHeaders = ForwardedHeaders.All;
+                });
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -48,6 +61,7 @@ namespace DevDays.Chat.Backend
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseForwardedHeaders();
             }
             else
             {
@@ -70,6 +84,9 @@ namespace DevDays.Chat.Backend
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
             });
+
+            // app.UseWebSockets();
+            // app.UseOcelot();
         }
     }
 }
