@@ -1,0 +1,9 @@
+* text=auto  eol=lf
+*.sh text
+*.cs text
+*.ts text
+*.vue text
+*.js text
+*.css text
+*.bat eol=crlf
+

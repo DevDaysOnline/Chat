@@ -1,0 +1,17 @@
+﻿ <Project>
+  <PropertyGroup>
+    <NoDefaultLaunchSettingsFile>True</NoDefaultLaunchSettingsFile>
+  </PropertyGroup>
+  <!-- these are the global nuget packages which should be used for every unit testing project, add a Directory.Builds.props file which imports this file-->
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="5.10.3" />
+    <PackageReference Include="xunit.core" Version="2.4.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" >
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>
