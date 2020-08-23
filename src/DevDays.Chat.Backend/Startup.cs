@@ -1,5 +1,9 @@
+using DevDays.Chat.Backend.Security;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -19,6 +23,23 @@ namespace DevDays.Chat.Backend
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRazorPages();
+            services.AddControllers();
+            services.AddAuthentication(o =>
+                {
+                    o.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    o.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    o.DefaultSignInScheme = "External";
+                })
+                .AddCookie(o =>
+                {
+                    o.LoginPath = new PathString("/login");
+                    o.Cookie.Name = "ddo.authentication";
+                })
+                .AddCookie("External", o =>
+                {
+                    o.Cookie.Name = "ddo.external.tmp";
+                })
+                .AddOpenIdConnectProvider("Twitch", Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,11 +61,14 @@ namespace DevDays.Chat.Backend
 
             app.UseRouting();
 
+            app.UseAuthentication();
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
+                endpoints.MapControllers();
             });
         }
     }
