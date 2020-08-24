@@ -3,13 +3,14 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Extensions.Options;
 
 namespace DevDays.Chat.Backend.Controllers
 {
     [Route("security")]
+    [ApiController]
     public class SecurityController : Controller
     {
         readonly IOptionsSnapshot<AuthenticationOptions> _optionsSnapshot;
@@ -17,6 +18,56 @@ namespace DevDays.Chat.Backend.Controllers
         public SecurityController(IOptionsSnapshot<AuthenticationOptions> optionsSnapshot)
         {
             _optionsSnapshot = optionsSnapshot;
+        }
+
+        [Route("login")]
+        public IActionResult Login(string? returnUrl = "~/")
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                return Redirect("/");
+            }
+
+            if (!Url.IsLocalUrl(returnUrl))
+            {
+                returnUrl = "~/";
+            }
+
+            var authenticationProperties = new AuthenticationProperties()
+            {
+                RedirectUri = Url.Action("External"),
+                Items = {{"returnUrl", returnUrl}}
+            };
+
+            return new ChallengeResult("Twitch", authenticationProperties);
+        }
+
+        [Route("user")]
+        [Authorize()]
+        public IActionResult GetUser()
+        {
+            var model = new
+            {
+                Name = User.FindFirstValue(JwtRegisteredClaimNames.UniqueName),
+                PicturUrl = User.FindFirstValue("picture"),
+                EMail = User.FindFirstValue("email")
+            };
+
+            return Ok(model);
+        }
+
+
+        [Route("user2")]
+        public IActionResult GetUser2()
+        {
+            var model = new
+            {
+                Name = "Albert Weinert",
+                PicturUrl = "https://pbs.twimg.com/profile_images/1053756847121936384/SDbukD1k_400x400.jpg",
+                EMail = "info@der-albert.com"
+            };
+
+            return Ok(model);
         }
 
         [Route("external")]

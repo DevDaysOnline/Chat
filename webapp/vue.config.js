@@ -1,29 +1,25 @@
-const fs = require('fs');
+const fs = require("fs");
 module.exports = {
   devServer: {
-    host: 'localhost',
+    host: "localhost",
     https: {
-      key: fs.readFileSync('./artifacts/tls/localhost.key'),
-      cert: fs.readFileSync('./artifacts/tls/localhost.crt'),
+      key: fs.readFileSync("./artifacts/tls/localhost.key"),
+      cert: fs.readFileSync("./artifacts/tls/localhost.crt")
     },
     port: 5002,
     proxy: {
-      '/login': {
-        target: 'https://localhost:5001',
+      "/api": {
+        target: "https://localhost:5001",
         xfwd: true
       },
-      '/api': {
-        target: 'https://localhost:5001',
-        xfwd: true
-       },
-      '/security/external': {
-        target: 'https://localhost:5001',
+      "/security": {
+        target: "https://localhost:5001",
         xfwd: true
       },
-      '/signin-twitch': {
-        target: 'https://localhost:5001',
+      "/signin-twitch": {
+        target: "https://localhost:5001",
         xfwd: true
       }
     }
   }
-}
+};

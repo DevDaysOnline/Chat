@@ -1,6 +1,5 @@
 using DevDays.Chat.Backend.Security;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -8,9 +7,6 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Ocelot.DependencyInjection;
-using Ocelot.Middleware;
-using ProxyKit;
 
 namespace DevDays.Chat.Backend
 {
@@ -29,9 +25,7 @@ namespace DevDays.Chat.Backend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddRazorPages();
             services.AddControllers();
-            services.AddOcelot();
             services.AddAuthentication(o =>
                 {
                     o.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -40,7 +34,7 @@ namespace DevDays.Chat.Backend
                 })
                 .AddCookie(o =>
                 {
-                    o.LoginPath = new PathString("/login");
+                    o.LoginPath = new PathString("/security/login");
                     o.Cookie.Name = "ddo.authentication";
                 })
                 .AddCookie("External", o => { o.Cookie.Name = "ddo.external.tmp"; })
@@ -81,12 +75,9 @@ namespace DevDays.Chat.Backend
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapRazorPages();
                 endpoints.MapControllers();
             });
 
-            // app.UseWebSockets();
-            // app.UseOcelot();
         }
     }
 }
